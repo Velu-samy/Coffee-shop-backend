@@ -16,16 +16,16 @@ RUN docker-php-ext-install pdo pdo_pgsql mbstring bcmath gd xml zip
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy composer files and install dependencies
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader
-
-# Copy rest of the app
+# Copy entire app
 COPY . .
+
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
 
 # Set permissions
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+# Expose port
 EXPOSE 9000
 CMD ["php-fpm"]
