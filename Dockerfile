@@ -1,28 +1,34 @@
-# Use PHP 8.2 with FPM
+# Example Dockerfile for Laravel
 FROM php:8.2-fpm
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libonig-dev libxml2-dev libzip-dev \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
-
-# Install Composer
-COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www
 
-# Copy project files
-COPY . .
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    git zip unzip libpq-dev && docker-php-ext-install pdo pdo_pgsql
 
-# Install PHP dependencies
+# Copy composer files
+COPY composer.json composer.lock ./
+
+# Install composer
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+    && php -r "unlink('composer-setup.php');"
+
 RUN composer install --no-dev --optimize-autoloader
 
-# Permissions for Laravel
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Copy application
+COPY . .
+
+# Set permissions
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+# Run migrations
+RUN php artisan migrate --force
 
 # Expose port
-EXPOSE 8000
+EXPOSE 9000
 
-# Start Laravel server
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["php-fpm"]
