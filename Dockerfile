@@ -25,8 +25,7 @@ COPY . .
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Run migrations
-RUN php artisan migrate --force
+
 
 # Expose port
 EXPOSE 9000
