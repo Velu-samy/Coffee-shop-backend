@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Coffee;
 use Illuminate\Http\Request;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class CoffeeController extends Controller
 {
@@ -17,14 +18,17 @@ class CoffeeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'name'        => 'required|string|max:255',
+            'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
+            'price'       => 'required|numeric|min:0',
         ]);
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('coffees', 'public');
+            $validated['image'] = Cloudinary::upload(
+                $request->file('image')->getRealPath(),
+                ['folder' => 'coffee-shop']
+            )->getSecurePath();
         }
 
         $coffee = Coffee::create($validated);
@@ -53,15 +57,17 @@ class CoffeeController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'price' => 'sometimes|required|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'name'        => 'sometimes|required|string|max:255',
+            'price'       => 'sometimes|required|numeric|min:0',
+            'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'description' => 'nullable|string',
-        
         ]);
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('coffees', 'public');
+            $validated['image'] = Cloudinary::upload(
+                $request->file('image')->getRealPath(),
+                ['folder' => 'coffee-shop']
+            )->getSecurePath();
         }
 
         $coffee->update($validated);
