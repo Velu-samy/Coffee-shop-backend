@@ -14,7 +14,7 @@ Route::post('login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/orders', [OrderController::class, 'store']);
-Route::resource('drink', DrinksController::class); // Assuming this was missing
+Route::resource('/drink', DrinksController::class); // Assuming this was missing
 Route::resource('snack', SnacksController::class); // Assuming this was missing
 
 Route::resource('coffee', CoffeeController::class); // Assuming this was missing
